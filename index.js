@@ -10,40 +10,49 @@ const PORT = process.env.PORT || 5000;
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
-// app.use(cors({
-//   origin: 'http://example.com' // Разрешить только example.com, localhost будет заблокирован
-// }));
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET; // Ваш SECRET_KEY
 
 app.use(express.json());
-// app.use(cors());
 
 app.use(cors({
-  origin: 'https://templates-23682.web.app', // Разрешенный источник
-}))
-
-// Либо настрой CORS вручную
-// app.use(cors({
-//   origin: 'http://example.com', // Разрешенный источник
-//   methods: ['GET', 'POST'], // Разрешенные методы
-//   allowedHeaders: ['Content-Type', 'Authorization'], // Разрешенные заголовки
-//   credentials: true // Разрешает куксы и авторизационные заголовки
-// }));
-
-
-
+  origin: 'https://templates-23682.web.app',
+}));
 
 app.post("/sendMessage", async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, message, recaptchaToken } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: "Сообщение не может быть пустым" });
   }
 
+  if (!recaptchaToken) {
+    return res.status(400).json({ error: "Не пройдена проверка reCAPTCHA" });
+  }
+
+  // Проверка reCAPTCHA на сервере
+  try {
+    const recaptchaRes = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: RECAPTCHA_SECRET,
+          response: recaptchaToken,
+        },
+      }
+    );
+
+    if (!recaptchaRes.data.success || recaptchaRes.data.score < 0.5) {
+      return res.status(400).json({ error: "reCAPTCHA не пройдена" });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Ошибка проверки reCAPTCHA" });
+  }
+
   const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
   try {
-    const response = await axios.post(telegramUrl, {
+    await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
       text: `${name}\n${email}\n${message}\n`,
     });
