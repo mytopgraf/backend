@@ -16,7 +16,11 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 // }));
 
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
+
+app.use(cors({
+  origin: 'https://templates-23682.web.1app', // Разрешенный источник
+}))
 
 // Либо настрой CORS вручную
 // app.use(cors({
