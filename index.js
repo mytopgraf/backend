@@ -19,7 +19,7 @@ app.use(express.json());
 // app.use(cors());
 
 app.use(cors({
-  origin: 'https://templates-23682.web.1app', // Разрешенный источник
+  origin: 'https://templates-23682.web.app', // Разрешенный источник
 }))
 
 // Либо настрой CORS вручную
