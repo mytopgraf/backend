@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const cors = require("cors");
+const { databases } = require("appwriteConfig")
 
 dotenv.config();
 
@@ -52,16 +53,45 @@ app.post("/sendMessage", async (req, res) => {
   const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
   try {
+
+    textData = {
+      product_id: product_id,
+      customer_name: name,
+      customer_email, email,
+      customer_message: message
+    }
+
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
       text: `${product_id}\n${name}\n${email}\n${message}\n`,
     });
 
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
+
+    await addDocument(textData);
+
   } catch (error) {
     res.status(500).json({ error: error.response?.data?.description || error.message });
   }
 });
+
+async function addDocument(textData) {
+  try {
+      const document = await databases.createDocument(
+          process.env.DATABASE_ID,    // Your database ID
+          process.env.ORDERS_ID,  // Your collection ID
+          "unique()",       // Unique document ID (or set manually)
+          textData
+      );
+      console.log("Document Added:", document);
+  } catch (error) {
+      console.error("Error Adding Document:", error);
+  }
+}
+
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
