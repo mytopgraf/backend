@@ -2,10 +2,16 @@ const express = require("express");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const cors = require("cors");
-const { databases } = require("./appwriteConfig");
-
+const { Client, Databases, ID } = require("appwrite")
 
 dotenv.config();
+
+const projectId = process.env.PROJECT_ID
+const databaseId = process.env.DATABASE_ID
+const ordersId = process.env.ORDERS_ID
+
+const client = new Client().setProject(projectId);
+const databases = new Databases(client);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +19,8 @@ const PORT = process.env.PORT || 5000;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET; // Ваш SECRET_KEY
+
+const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
 app.use(express.json());
 
@@ -51,16 +59,18 @@ app.post("/sendMessage", async (req, res) => {
     return res.status(500).json({ error: "Ошибка проверки reCAPTCHA" });
   }
 
-  const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
 
   try {
 
     textData = {
       product_id: product_id,
       customer_name: name,
-      customer_email, email,
+      customer_email: email,
       customer_message: message
     }
+
+    await addDocument(textData);
 
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
@@ -69,29 +79,26 @@ app.post("/sendMessage", async (req, res) => {
 
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
 
-    await addDocument(textData);
 
   } catch (error) {
     res.status(500).json({ error: error.response?.data?.description || error.message });
   }
 });
 
+
 async function addDocument(textData) {
   try {
-      const document = await databases.createDocument(
-          process.env.DATABASE_ID,    // Your database ID
-          process.env.ORDERS_ID,  // Your collection ID
-          "unique()",       // Unique document ID (or set manually)
+      const response = await databases.createDocument(
+          databaseId,
+          ordersId,
+          ID.unique(),
           textData
       );
-      console.log("Document Added:", document);
+      console.log("Документ создан:", response);
   } catch (error) {
-      console.error("Error Adding Document:", error);
+      console.error("Ошибка при создании документа:", error);
   }
 }
-
-
-
 
 
 app.listen(PORT, () => {
