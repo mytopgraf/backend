@@ -31,6 +31,8 @@ app.use(cors({
 app.post("/sendMessage", async (req, res) => {
   const { product_id, name, email, message, recaptchaToken } = req.body;
 
+  const productId = parseInt(product_id, 10);
+
   if (!message) {
     return res.status(400).json({ error: "Сообщение не может быть пустым" });
   }
@@ -64,7 +66,7 @@ app.post("/sendMessage", async (req, res) => {
   try {
 
     textData = {
-      product_id: product_id,
+      product_id: productId,
       customer_name: name,
       customer_email: email,
       customer_message: message
