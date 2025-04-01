@@ -2,7 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const cors = require("cors");
-const { databases } = require("appwriteConfig")
+const { databases } = require("./appwriteConfig");
+
 
 dotenv.config();
 
