@@ -19,7 +19,7 @@ app.use(cors({
 }));
 
 app.post("/sendMessage", async (req, res) => {
-  const { name, email, message, recaptchaToken } = req.body;
+  const { product_id, name, email, message, recaptchaToken } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: "Сообщение не может быть пустым" });
@@ -54,7 +54,7 @@ app.post("/sendMessage", async (req, res) => {
   try {
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `${name}\n${email}\n${message}\n`,
+      text: `${product_id}\n${name}\n${email}\n${message}\n`,
     });
 
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
