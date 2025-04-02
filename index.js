@@ -86,11 +86,22 @@ app.post("/sendMessage", async (req, res) => {
 
     await addDocument(textData);
 
-    const currentDate = new Date().toLocaleString(); // Получаем текущую дату и время в локальном формате
+    // const currentDate = new Date().toLocaleString(); 
+
+    const currentDate = new Date();
+    const day = String(currentDate.getDate()).padStart(2, '0'); // Делаем день с ведущим нулем
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Месяц с ведущим нулем (месяцы с 0)
+    const year = currentDate.getFullYear(); // Получаем год
+    const hours = String(currentDate.getHours()).padStart(2, '0'); // Часы с ведущим нулем
+    const minutes = String(currentDate.getMinutes()).padStart(2, '0'); // Минуты с ведущим нулем
+
+    const formattedDate = `${day}.${month}.${year} ${hours}:${minutes}`;
+
+
 
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `✅ ${orderId}\n\n🖥 ${product_id}\n\n👫 ${name}\n\n📦 ${email}\n\n✍️ ${message}\n\n⏰ ${currentDate}`
+      text: `✅ ${orderId}\n\n🖥 ${product_id}\n\n👫 ${name}\n\n📦 ${email}\n\n✍️ ${message}\n\n⏰ ${formattedDate}`
     });
     
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
