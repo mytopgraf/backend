@@ -88,7 +88,7 @@ app.post("/sendMessage", async (req, res) => {
 
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `ORDERID:${orderId}\nPRODUCTID:${product_id}\nNAME:${name}\nEMAIL:${email}\nMESSAGE:${message}\n`,
+      text: `order_id=${orderId}\nproduct_id=${product_id}\nname=${name}\n${email}\nmessage=${message}\n`,
     });
 
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
