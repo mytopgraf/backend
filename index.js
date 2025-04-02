@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const axios = require("axios");
 const cors = require("cors");
 const { Client, Databases, ID } = require("appwrite")
+const { v4: uuidv4 } = require('uuid');
+
 
 dotenv.config();
 
@@ -27,6 +29,12 @@ app.use(express.json());
 app.use(cors({
   origin: 'https://templates-23682.web.app',
 }));
+
+function generateOrderId() {
+  const uuid = uuidv4(); // Генерируем UUID
+  return uuid.replace(/[^0-9]/g, '').slice(0, 10); // Оставляем только цифры и обрезаем до 10 символов
+}
+
 
 app.post("/sendMessage", async (req, res) => {
   const { product_id, name, email, message, recaptchaToken } = req.body;
@@ -65,8 +73,12 @@ app.post("/sendMessage", async (req, res) => {
 
   try {
 
+    const orderId = generateOrderId();
+    console.log(orderId); 
+
     textData = {
       product_id: productId,
+      order_id: orderId,
       customer_name: name,
       customer_email: email,
       customer_message: message
@@ -76,7 +88,7 @@ app.post("/sendMessage", async (req, res) => {
 
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `${product_id}\n${name}\n${email}\n${message}\n`,
+      text: `${orderId}\n${product_id}\n${name}\n${email}\n${message}\n`,
     });
 
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
