@@ -37,11 +37,11 @@ function generateOrderId() {
 
 
 app.post("/sendMessage", async (req, res) => {
-  const { product_id, name, email, message, recaptchaToken } = req.body;
+  const { product_id, name, email, social, recaptchaToken } = req.body;
 
   const productId = parseInt(product_id, 10);
 
-  if (!message) {
+  if (!social) {
     return res.status(400).json({ error: "Сообщение не может быть пустым" });
   }
 
@@ -81,7 +81,7 @@ app.post("/sendMessage", async (req, res) => {
       order_id: orderId,
       customer_name: name,
       customer_email: email,
-      customer_message: message
+      customer_social: social
     }
 
     await addDocument(textData);
@@ -101,7 +101,7 @@ app.post("/sendMessage", async (req, res) => {
 
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `✅ ${orderId}\n\n🖥 ${product_id}\n\n👫 ${name}\n\n📦 ${email}\n\n✍️ ${message}\n\n⏰ ${formattedDate}`
+      text: `✅ ${orderId}\n\n🖥 ${product_id}\n\n👫 ${name}\n\n📦 ${email}\n\n✍️ ${social}\n\n⏰ ${formattedDate}`
     });
     
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
