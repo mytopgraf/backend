@@ -88,25 +88,9 @@ app.post("/sendMessage", async (req, res) => {
 
     const currentDate = new Date().toLocaleString(); // Получаем текущую дату и время в локальном формате
 
-
-
-
     await axios.post(telegramUrl, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: `
-            ✅ ${orderId}
-            <br><br>
-            🖥 ${product_id}
-            <br><br>
-            👫 ${name}
-            <br><br>
-            📦 ${email}
-            <br><br>
-            ✍️ ${message}
-            <br><br>
-            ⏰ ${currentDate}
-            `,
-      parse_mode: 'HTML' // Указываем, что текст будет интерпретироваться как HTML
+      text: `✅ ${orderId}\n\n🖥 ${product_id}\n\n👫 ${name}\n\n📦 ${email}\n\n✍️ ${message}\n\n⏰ ${currentDate}`
     });
     
     res.json({ success: true, message: "Сообщение отправлено в Telegram" });
